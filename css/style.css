@@ -20,7 +20,7 @@ body {
   flex-flow: column nowrap;
 }
 
-.content {
+.main {
   margin-top: 5rem;
   padding: 5rem 0;
 }
@@ -80,6 +80,16 @@ a {
   font-weight: 300;
 }
 
+.caption {
+  font: italic 0.8rem "PT Serif", serif;
+}
+
+.caption small {
+  color: rgba(0, 0, 0, 0.64);
+  font-style: normal;
+  font-size: 0.6rem;
+}
+
 .content > .title {
   margin-top: 2.5rem;
 }
@@ -99,6 +109,7 @@ a {
 
 .container {
   width: 37rem;
+  max-width: 100vw;
   padding: 0 1rem;
   margin: 0 auto;
 }
@@ -118,15 +129,62 @@ a {
 }
 
 .image-container img {
-  max-width: 100%;
+  width: 105%;
+  transition: 400ms;
 }
 
-.image-container.open {
-  cursor: inherit;
-  background-color: #feffff;
-  position: fixed;
+.image-container.top {
+  align-items: flex-start;
+}
+
+.image-container.narrow {
+  width: 35rem;
+}
+
+.lightbox {
+  background-color: rgba(254, 255, 255, 0.1);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   width: 100vw;
-  height: 100vh;
+  max-width: 100vw;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  margin: 0;
+  transition: 400ms opacity;
+  z-index: 9999;
+}
+
+.lightbox.open {
+  background-color: #feffff;
+  display: flex;
+}
+
+.lightbox.row {
+  flex-flow: row nowrap;
+  padding-left: 240px;
+}
+
+.lightbox.row span {
+  width: 220px;
+  margin-left: 20px;
+}
+
+.lightbox.column {
+  flex-flow: column nowrap;
+}
+
+.lightbox.column span {
+  margin-top: 40px;
+}
+
+.lightbox img {
+  max-height: 100%;
+  max-width: 100%;
 }
 
 .flex {
@@ -137,12 +195,7 @@ a {
   align-items: flex-start;
 }
 
-.nav {
-  display: flex;
-  align-self: flex-end;
-}
-
-.nav a {
+.button, .close-button {
   color: rgba(0, 0, 0, 0.8);
   font-size: 0.8rem;
   font-weight: 700;
@@ -153,16 +206,31 @@ a {
   transition: 200ms;
 }
 
-.nav a:hover {
+.button:hover, .close-button:hover {
   color: black;
   background-color: #ff7;
   box-shadow: 0.2rem 0.2rem 0.4rem rgba(0, 0, 0, 0.2);
 }
 
-.nav a:active, .nav a:focus {
+.button:active, .close-button:active, .button:focus, .close-button:focus {
   color: black;
   background-color: #ff7;
   box-shadow: 0.1rem 0.1rem 0.1rem rgba(0, 0, 0, 0.44);
+}
+
+.close-button {
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0 0 0.5rem;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10000;
 }
 
 .header {
@@ -221,6 +289,11 @@ a {
   margin-left: auto;
 }
 
+.nav {
+  display: flex;
+  align-self: flex-end;
+}
+
 .footer {
   margin-top: auto;
   font-size: 0.6rem;
@@ -228,4 +301,8 @@ a {
   display: flex;
   justify-content: center;
   align-items: flex-start;
+}
+
+.hidden {
+  display: none;
 }
