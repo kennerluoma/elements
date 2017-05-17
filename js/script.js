@@ -1,44 +1,83 @@
 $(function () {
     const $window = $(window);
+    if ($window.scrollTop() > 100)
+        $(`.header`).addClass(`small`);
     $window.on(`scroll`, () => {
         $window.scrollTop() > 100 ? $(`.header`).addClass(`small`) : $(`.header`).removeClass(`small`);
     });
-    const lightbox = () => {
-        let s;
-        const $lb = $(`#lightbox`), $lbcontent = $(`#lightbox>*`), $lbcaption = $(`#lightbox>.caption`), max = 200;
-        $(`.image-container img`).on(`click`, function () {
-            $lb.css({});
-            s = $window.scrollTop();
-            $lb.addClass(`open`);
-            $lb.css({
-                top: `${s - max}px`,
-                paddingTop: `${max + 40}px`,
-                paddingBottom: `${max + 40}px`,
-                height: `${$window.height() + max * 2}px`,
-                maxHeight: `${$window.height() + max * 2}px`,
-                opacity: `1`
-            });
-            if ($(this).height() < $(this).width()) {
+    const lightbox = (target) => {
+        const images = target.map(function () {
+            return this;
+        }).toArray();
+        let imageIndex;
+        const $lb = $(`#lightbox`), $lbcontent = $(`#lightbox>:not(#close)`), $lbcaption = $(`#lightbox>.caption`), $closeBtn = $(`#lightbox>#close`);
+        const maxScrollDistance = 200;
+        let scrollPosition;
+        const updateLightbox = (image) => {
+            const $image = $(image);
+            if ($image.height() < $image.width()) {
                 $lb.addClass(`column`).removeClass(`row`);
             }
             else {
                 $lb.addClass(`row`).removeClass(`column`);
             }
-            $lbcontent.attr(`src`, $(this).attr(`src`)).attr(`alt`, $(this).attr(`alt`));
-            $lbcaption.text($(this).attr(`alt`));
-            console.log($lbcaption);
+            $lbcontent.attr(`src`, $image.attr(`src`)).attr(`alt`, $image.attr(`alt`));
+            $lbcaption.text($image.attr(`alt`));
+        };
+        $(images).on(`click`, function () {
+            imageIndex = images.indexOf(this);
+            scrollPosition = $window.scrollTop();
+            $lb.addClass(`open`);
+            $lb.css({
+                top: `${scrollPosition - maxScrollDistance}px`,
+                paddingTop: `${maxScrollDistance + 40}px`,
+                paddingBottom: `${maxScrollDistance + 40}px`,
+                height: `${$window.height() + maxScrollDistance * 2}px`,
+                maxHeight: `${$window.height() + maxScrollDistance * 2}px`,
+                opacity: `1`
+            });
+            updateLightbox($(this));
             $window.on(`scroll`, () => {
-                let offset = Math.abs($window.scrollTop() - s), opacity = (max - offset) / (max - 100) > 1 ? 1 : (max - offset) / 100;
-                offset > max ? close() : $lbcontent.css({ opacity: `${opacity}` });
-                console.log(opacity, max, offset);
+                let offset = Math.abs($window.scrollTop() - scrollPosition);
+                let opacity = (maxScrollDistance - offset) / (maxScrollDistance - 100) > 1 ? 1 : (maxScrollDistance - offset) / 100;
+                offset > maxScrollDistance ? close(false) : $lbcontent.css({ opacity: `${opacity}` });
             });
         });
-        const close = () => {
-            $lb.removeClass(`open`);
-            $lb.css({ opacity: `0` });
-            $lbcontent.removeAttr(`style`);
+        $(document).on(`keydown`, (event) => {
+            const key = event.keyCode;
+            if ((key === 39 || key === 37) && ($lb.hasClass(`open`))) {
+                key === 39 && imageIndex < images.length - 1 ? ++imageIndex :
+                    key === 37 && imageIndex > 0 ? --imageIndex : close();
+                if ($lbcontent.is(`:animated`)) {
+                    $lbcontent.stop(true, false);
+                }
+                $lbcontent.animate({
+                    opacity: 0
+                }, 200, () => {
+                    updateLightbox(images[imageIndex]);
+                }).animate({
+                    opacity: 1
+                }, 200);
+            }
+            else if (key === 27 && ($lb.hasClass(`open`))) {
+                close();
+            }
+        });
+        const close = (fading = true) => {
+            if (fading) {
+                $lb.animate({
+                    opacity: 0
+                }, 200, function () {
+                    $lbcontent.removeAttr(`style`);
+                    $lb.removeClass(`open`);
+                });
+            }
+            else {
+                $lb.removeClass(`open`).css({ opacity: `0` });
+                $lbcontent.removeAttr(`style`);
+            }
         };
-        $(`#close`).on(`click`, close);
+        $(`#close`).on(`click`, () => { close(); });
     };
-    lightbox();
+    lightbox($(`.image-container img`));
 });
